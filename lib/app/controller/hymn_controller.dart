@@ -30,19 +30,6 @@ String get selectedHymnLanguage => selectedLanguage.value;
     allHymns.value = await HymnService.loadAll();
   }
 
-// Future<void> _checkFavoriteStatus() async {
-//     _isFavorite.value = await DatabaseService.instance.isFavorite(hymn.id);
-//   }
-
-//   Future<void> toggleFavorite() async {
-//     if (_isFavorite.value) {
-//       await DatabaseService.instance.removeFavorite(hymn.id);
-//     } else {
-//       await DatabaseService.instance.addFavorite(hymn);
-//     }
-//     _isFavorite.value = !_isFavorite.value;
-//     hymn.isFavorite = _isFavorite.value;
-//   }
 
   void _loadFontSize() {
     _fontSize.value = StorageService.getFontSize();
