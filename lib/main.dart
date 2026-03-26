@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:efth/app/screens/home_screen.dart';
 import 'package:efth/app/service/db_service.dart';
 import 'package:efth/app/service/storage_service.dart';
@@ -6,12 +8,18 @@ import 'package:efth/utils/theme.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
+import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 import 'package:wakelock_plus/wakelock_plus.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  if (Platform.isWindows || Platform.isLinux || Platform.isMacOS) {
+    sqfliteFfiInit();
+    databaseFactory = databaseFactoryFfi;
+  }
   await DBService.init();
   await StorageService.init();
+
 
   SystemChrome.setSystemUIOverlayStyle(
     const SystemUiOverlayStyle(
