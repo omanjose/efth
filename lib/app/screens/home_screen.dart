@@ -20,15 +20,9 @@ class HomeScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final favController = Get.find<FavouriteController>();
     final hymnCtrl = Get.find<HymnController>();
     final searchCtrl = Get.find<SearchQueryController>();
-    final cs = Theme
-        .of(context)
-        .colorScheme;
-    final isDark = Theme
-        .of(context)
-        .brightness == Brightness.dark;
+    final cs = Theme.of(context).colorScheme;
 
     return Scaffold(
       appBar: AppBar(
@@ -36,15 +30,17 @@ class HomeScreen extends StatelessWidget {
         actions: [
           _AppBarIconBtn(
             icon: Icons.favorite_rounded,
-            onPressed: () =>
-                Get.to(() => const FavouriteScreen(),
-                    transition: Transition.cupertino),
+            onPressed: () => Get.to(
+                  () => const FavouriteScreen(),
+              transition: Transition.cupertino,
+            ),
           ),
           _AppBarIconBtn(
             icon: Icons.tune_rounded,
-            onPressed: () =>
-                Get.to(() => const SettingsView(),
-                    transition: Transition.cupertino),
+            onPressed: () => Get.to(
+                  () => const SettingsView(),
+              transition: Transition.cupertino,
+            ),
           ),
           const SizedBox(width: 6),
         ],
@@ -77,126 +73,142 @@ class HomeScreen extends StatelessWidget {
       ),
 
       body: Column(
-          children: [
-      // ── Search bar ──────────────────────────────────────────
-      Padding(
-      padding: const EdgeInsets.fromLTRB(16, 14, 16, 8),
-      child: TextField(
-        controller: searchCtrl.queryController,
-        onChanged: (v) => searchCtrl.query.value = v,
-        decoration: const InputDecoration(
-          hintText: 'Search by title, number or word…',
-          prefixIcon: Icon(Icons.search_rounded, size: 20),
-        ),
-      ),
-    ),
+        children: [
+          // ── Search bar ──────────────────────────────────────────────────
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 14, 16, 8),
+            child: TextField(
+              controller: searchCtrl.queryController,
+              onChanged: (v) => searchCtrl.query.value = v,
+              decoration: const InputDecoration(
+                hintText: 'Search by title, number or word…',
+                prefixIcon: Icon(Icons.search_rounded, size: 20),
+              ),
+            ),
+          ),
 
-    // ── Count bar ───────────────────────────────────────────
-    Obx(() {
-    final list = searchCtrl.filter(hymnCtrl.hymns);
-    return Padding(
-    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-    child: Row(
-    children: [
-    Text(
-    '${list.length} HYMNS',
-    style: TextStyle(
-    fontSize: 10,
-    fontWeight: FontWeight.w600,
-    letterSpacing: 1.5,
-    color: cs.onSurfaceVariant,
-    ),
-    ),
-    const SizedBox(width: 10),
-    Expanded(
-    child: Container(height: 1.5, color: cs.outline),
-    ),
-    const SizedBox(width: 10),
-    Obx(() {
-    final lang = hymnCtrl.language.value;
-    final accent = lang == 'english'
-    ? AppColors.english
-        : lang == 'igbo'
-    ? AppColors.igbo
-        : AppColors.efik;
-    return Container(
-    width: 8,
-    height: 8,
-    decoration: BoxDecoration(
-    color: accent,
-    shape: BoxShape.circle,
-    ),
-    );
-    }),
-    ],
-    ),
-    );
-    }),
-
-
-    // ── List ────────────────────────────────────────────────
-    Expanded(
-      child: Obx(() {
-        final list = searchCtrl.filter(hymnCtrl.hymns);
-
-        if (hymnCtrl.isLoading || hymnCtrl.hymns.isEmpty) {
-          return _EmptyState(
-            icon: Icons.music_note_rounded,
-            message: 'Loading hymns…',
-            showLoader: true,
-          );
-        }
-
-        if (list.isEmpty) {
-          return _EmptyState(
-            icon: Icons.search_off_rounded,
-            message: 'No hymns found',
-          );
-        }
-
-        return ListView.builder(
-          padding: const EdgeInsets.fromLTRB(16, 4, 16, 24),
-          itemCount: list.length,
-          itemBuilder: (context, index) {
-            final hymn = list[index];
-            final accent = hymn.language == 'english'
-                ? AppColors.english
-                : hymn.language == 'igbo'
+          // ── Count bar ───────────────────────────────────────────────────
+          Obx(() {
+            // Reading allHymns, language and query makes this reactive
+            final langHymns = hymnCtrl.hymns;
+            final filtered = searchCtrl.filter(langHymns);
+            final lang = hymnCtrl.language.value;
+            final accent = lang == 'igbo'
                 ? AppColors.igbo
-                : AppColors.efik;
+                : lang == 'efik'
+                ? AppColors.efik
+                : AppColors.english;
 
             return Padding(
-              padding: const EdgeInsets.only(bottom: 8),
-              child: _HymnCard(
-                hymn: hymn,
-                accent: accent,
-                onTap: () {
-                  final idx = hymnCtrl.allHymns.indexOf(hymn);
-                  Get.to(
-                        () => HymnDetailScreen(
-                      selectedIndex: idx,
-                      items: hymnCtrl.allHymns,
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+              child: Row(
+                children: [
+                  Text(
+                    '${filtered.length} HYMNS',
+                    style: TextStyle(
+                      fontSize: 10,
+                      fontWeight: FontWeight.w600,
+                      letterSpacing: 1.5,
+                      color: cs.onSurfaceVariant,
                     ),
-                    transition: Transition.cupertino,
-                  );
-                },
+                  ),
+                  const SizedBox(width: 10),
+                  Expanded(child: Container(height: 1.5, color: cs.outline)),
+                  const SizedBox(width: 10),
+                  Container(
+                    width: 8,
+                    height: 8,
+                    decoration: BoxDecoration(
+                      color: accent,
+                      shape: BoxShape.circle,
+                    ),
+                  ),
+                ],
               ),
             );
-          },
-        );
-      }),
-    ),
-    ],
-    ),
+          }),
+
+          // ── List ────────────────────────────────────────────────────────
+          Expanded(
+            child: Obx(() {
+              // ── FIX: read allHymns.length directly so this Obx is
+              // registered as a listener on the RxList and rebuilds
+              // the moment load() assigns allHymns.value.
+              final loading = hymnCtrl.isLoading;
+              final langHymns = hymnCtrl.hymns; // reactive: allHymns + language
+              final list = searchCtrl.filter(langHymns);
+
+              // Still loading — show spinner
+              if (loading) {
+                return const _EmptyState(
+                  icon: Icons.music_note_rounded,
+                  message: 'Loading hymns…',
+                  showLoader: true,
+                );
+              }
+
+              // Loaded but empty (shouldn't happen unless JSON is missing)
+              if (langHymns.isEmpty) {
+                return const _EmptyState(
+                  icon: Icons.music_note_rounded,
+                  message: 'No hymns available',
+                );
+              }
+
+              // Search returned no results
+              if (list.isEmpty) {
+                return const _EmptyState(
+                  icon: Icons.search_off_rounded,
+                  message: 'No hymns found',
+                );
+              }
+
+              return ListView.builder(
+                padding: const EdgeInsets.fromLTRB(16, 4, 16, 24),
+                itemCount: list.length,
+                itemBuilder: (context, index) {
+                  final hymn = list[index];
+                  final accent = hymn.language == 'igbo'
+                      ? AppColors.igbo
+                      : hymn.language == 'efik'
+                      ? AppColors.efik
+                      : AppColors.english;
+
+                  return Padding(
+                    padding: const EdgeInsets.only(bottom: 8),
+                    child: _HymnCard(
+                      hymn: hymn,
+                      accent: accent,
+                      onTap: () {
+                        // Pass the language-filtered list and the index
+                        // within that list — HymnDetailScreen pins language
+                        // and filters identically, keeping indices in sync.
+                        final filteredList = hymnCtrl.hymns;
+                        final idx = filteredList.indexOf(hymn);
+                        Get.to(
+                              () => HymnDetailScreen(
+                            selectedIndex: idx,
+                            items: filteredList,
+                          ),
+                          transition: Transition.cupertino,
+                        );
+                      },
+                    ),
+                  );
+                },
+              );
+            }),
+          ),
+        ],
+      ),
     );
   }
 }
 
-// ─── Sub-widgets ────────────────────────────────────────────────────────────
+// ─── Sub-widgets ──────────────────────────────────────────────────────────────
 
 class _AppBarIconBtn extends StatelessWidget {
   const _AppBarIconBtn({required this.icon, required this.onPressed});
-
   final IconData icon;
   final VoidCallback onPressed;
 
@@ -228,9 +240,7 @@ class _LanguageChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final cs = Theme
-        .of(context)
-        .colorScheme;
+    final cs = Theme.of(context).colorScheme;
     return GestureDetector(
       onTap: onTap,
       child: AnimatedContainer(
@@ -274,10 +284,7 @@ class _HymnCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final cs = Theme
-        .of(context)
-        .colorScheme;
-
+    final cs = Theme.of(context).colorScheme;
     return Material(
       color: cs.surfaceVariant,
       borderRadius: BorderRadius.circular(14),
@@ -295,7 +302,6 @@ class _HymnCard extends StatelessWidget {
           ),
           child: Row(
             children: [
-              // ID badge
               Container(
                 width: 42,
                 height: 38,
@@ -316,7 +322,6 @@ class _HymnCard extends StatelessWidget {
                 ),
               ),
               const SizedBox(width: 12),
-              // Title + preview
               Expanded(
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
@@ -333,9 +338,7 @@ class _HymnCard extends StatelessWidget {
                     ),
                     const SizedBox(height: 2),
                     Text(
-                      hymn.lyrics
-                          .split('\n')
-                          .first,
+                      hymn.lyrics.split('\n').first,
                       style: TextStyle(
                         fontSize: 11,
                         fontStyle: FontStyle.italic,
@@ -372,9 +375,7 @@ class _EmptyState extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final cs = Theme
-        .of(context)
-        .colorScheme;
+    final cs = Theme.of(context).colorScheme;
     return Center(
       child: Column(
         mainAxisSize: MainAxisSize.min,

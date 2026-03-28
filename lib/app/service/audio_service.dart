@@ -1,72 +1,71 @@
-import 'package:flutter/cupertino.dart';
-import 'package:get/get.dart';
+import 'dart:io';
 import 'package:just_audio/just_audio.dart';
 
-class AudioService extends GetxController {
+class AudioService {
   final player1 = AudioPlayer();
   final player2 = AudioPlayer();
 
-  // final AudioDownloadService _downloadService = Get.find<AudioDownloadService>();
-
-  final isPlaying = false.obs;
-  final duration = Duration.zero.obs;
-  final position = Duration.zero.obs;
-  final currentHymnId = ''.obs;
-  final isAudioAvailable = false.obs;
-
-
-  // Future<bool> loadAudio(String audioId) async {
-  //   try {
-  //     currentHymnId.value = audioId;
-  //
-  //     // Check if audio file is downloaded
-  //     final audioPath = await _downloadService.getAudioPath(audioId);
-  //
-  //     if (audioPath == null) {
-  //       isAudioAvailable.value = false;
-  //       return false;
-  //     }
-  //
-  //     await player1.setFilePath(audioPath);
-  //     isAudioAvailable.value = true;
-  //     return true;
-  //   } catch (e) {
-  //     debugPrint('Error loading audio: $e');
-  //     isAudioAvailable.value = false;
-  //     return false;
-  //   }
-  // }
-
-  Future<void> playOne(String asset) async {
+  /// Play single asset audio
+  Future<void> playOne(String assetPath) async {
     await stop();
-    await player1.setAsset(asset);
+    await player1.setAsset(assetPath);
     await player1.play();
   }
 
-  Future<void> playTwo(String a, String b) async {
+  /// Play single file audio
+  Future<void> playOneFromFile(File file) async {
+    await stop();
+    await player1.setFilePath(file.path);
+    await player1.play();
+  }
+
+  /// Play two assets in sequence
+  Future<void> playTwo(String assetA, String assetB) async {
     await stop();
 
-    await player1.setAsset(a);
-    await player2.setAsset(b);
+    // Set up concatenating audio source
+    final playlist = ConcatenatingAudioSource(
+      children: [
+        AudioSource.asset(assetA),
+        AudioSource.asset(assetB),
+      ],
+    );
 
+    await player1.setAudioSource(playlist);
     await player1.play();
-    await player2.play();
   }
 
-  Future<void> pause() async {
-    await player1.pause();
-    await player2.pause();
+  /// Play two files in sequence
+  Future<void> playTwoFromFiles(File fileA, File fileB) async {
+    await stop();
+
+    // Set up concatenating audio source from files
+    final playlist = ConcatenatingAudioSource(
+      children: [
+        AudioSource.file(fileA.path),
+        AudioSource.file(fileB.path),
+      ],
+    );
+
+    await player1.setAudioSource(playlist);
+    await player1.play();
   }
 
+  /// Pause playback
+  void pause() {
+    player1.pause();
+    player2.pause();
+  }
+
+  /// Stop all playback
   Future<void> stop() async {
     await player1.stop();
     await player2.stop();
   }
 
-  @override
-  void onClose() {
+  /// Dispose players
+  void dispose() {
     player1.dispose();
     player2.dispose();
-    super.onClose();
   }
 }
