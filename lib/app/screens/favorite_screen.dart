@@ -1,66 +1,59 @@
-
+import 'package:efth/app/controller/favorite_controller.dart';
 import 'package:efth/app/screens/hymn_detail_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 import '../../utils/theme.dart';
-import '../controller/favorite_controller.dart';
 
 class FavouriteScreen extends StatelessWidget {
   const FavouriteScreen({super.key});
 
-  Color _langAccent(String lang) {
-    switch (lang) {
-      case 'igbo':
-        return AppColors.igbo;
-      case 'efik':
-        return AppColors.efik;
-      default:
-        return AppColors.english;
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
-    final favController = Get.find<FavouriteController>();
+    final favCtrl = Get.find<FavouriteController>();
     final cs = Theme.of(context).colorScheme;
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('SAVED HYMNS'),
+        title: const Text('FAVOURITES'),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back_ios_rounded, size: 18),
           onPressed: () => Get.back(),
         ),
+        bottom: PreferredSize(
+          preferredSize: const Size.fromHeight(56),
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(16, 0, 16, 10),
+            child: TextField(
+              onChanged: favCtrl.filterFavorites,
+              decoration: const InputDecoration(
+                hintText: 'Search favourites…',
+                prefixIcon: Icon(Icons.search_rounded, size: 20),
+              ),
+            ),
+          ),
+        ),
       ),
       body: Obx(() {
-        final hymns = favController.favouriteHymns;
+        final list = favCtrl.filteredFavorites;
 
-        if (hymns.isEmpty) {
+        if (list.isEmpty) {
           return Center(
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Icon(
-                  Icons.favorite_border_rounded,
-                  size: 48,
-                  color: cs.onSurfaceVariant.withOpacity(0.35),
-                ),
+                Icon(Icons.favorite_border_rounded,
+                    size: 48,
+                    color: cs.onSurfaceVariant.withOpacity(0.3)),
                 const SizedBox(height: 16),
                 Text(
-                  'No saved hymns yet',
+                  favCtrl.favouriteHymns.isEmpty
+                      ? 'No favourites yet'
+                      : 'No results found',
                   style: TextStyle(
-                    fontSize: 17,
+                    fontSize: 15,
                     fontStyle: FontStyle.italic,
                     color: cs.onSurfaceVariant,
-                  ),
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  'Tap ♡ on any hymn to save it here',
-                  style: TextStyle(
-                    fontSize: 13,
-                    color: cs.onSurfaceVariant.withOpacity(0.6),
                   ),
                 ),
               ],
@@ -68,149 +61,157 @@ class FavouriteScreen extends StatelessWidget {
           );
         }
 
-        return Column(
-          children: [
-            // ── Count bar ────────────────────────────────────
-            Padding(
-              padding: const EdgeInsets.fromLTRB(16, 14, 16, 6),
-              child: Row(
-                children: [
-                  Text(
-                    '${hymns.length} SAVED',
-                    style: TextStyle(
-                      fontSize: 10,
-                      fontWeight: FontWeight.w600,
-                      letterSpacing: 1.5,
-                      color: cs.onSurfaceVariant,
-                    ),
-                  ),
-                  const SizedBox(width: 10),
-                  Expanded(child: Container(height: 1, color: cs.outline)),
-                  const SizedBox(width: 10),
-                  Icon(
-                    Icons.favorite_rounded,
-                    size: 10,
-                    color: AppColors.error.withOpacity(0.9),
-                  ),
-                ],
-              ),
-            ),
+        return ListView.builder(
+          padding: const EdgeInsets.fromLTRB(16, 12, 16, 24),
+          itemCount: list.length,
+          itemBuilder: (context, index) {
+            final hymn = list[index];
+            final accent = hymn.language == 'igbo'
+                ? AppColors.igbo
+                : hymn.language == 'efik'
+                    ? AppColors.efik
+                    : AppColors.english;
 
-            // ── List ─────────────────────────────────────────
-            Expanded(
-              child: ListView.builder(
-                padding: const EdgeInsets.fromLTRB(16, 4, 16, 24),
-                itemCount: hymns.length,
-                itemBuilder: (_, i) {
-                  final hymn = hymns[i];
-                  final accent = _langAccent(hymn.language ?? 'english');
-
-                  return Padding(
-                    padding: const EdgeInsets.only(bottom: 8),
-                    child: Material(
-                      color: cs.surfaceVariant,
-                      borderRadius: BorderRadius.circular(14),
-                      child: InkWell(
-                        onTap: () {
-                          final idx = hymns.indexOf(hymn);
-                          Get.to(
-                                () => HymnDetailScreen(
-                              selectedIndex: idx,
-                              items: hymns,
-                            ),
-                            transition: Transition.cupertino,
-                          );
-                        },
-                        borderRadius: BorderRadius.circular(14),
-                        splashColor: accent.withOpacity(0.08),
-                        child: Container(
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 14, vertical: 12),
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(14),
-                            border: Border.all(color: cs.outline),
-                          ),
-                          child: Row(
-                            children: [
-                              // ID + accent dot
-                              Container(
-                                width: 44,
-                                height: 44,
-                                decoration: BoxDecoration(
-                                  color: accent.withOpacity(0.12),
-                                  border: Border.all(
-                                      color: accent.withOpacity(0.35)),
-                                  shape: BoxShape.circle,
-                                ),
-                                child: Center(
-                                  child: Text(
-                                    '${hymn.id}',
-                                    style: TextStyle(
-                                      fontWeight: FontWeight.w700,
-                                      fontSize: 13,
-                                      color: accent,
-                                    ),
-                                  ),
-                                ),
-                              ),
-                              const SizedBox(width: 12),
-                              // Info
-                              Expanded(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      hymn.title,
-                                      style: TextStyle(
-                                        fontWeight: FontWeight.w600,
-                                        fontSize: 14,
-                                        color: cs.onSurface,
-                                      ),
-                                      overflow: TextOverflow.ellipsis,
-                                    ),
-                                    const SizedBox(height: 4),
-                                    // Language pill
-                                    Container(
-                                      padding: const EdgeInsets.symmetric(
-                                          horizontal: 8, vertical: 2),
-                                      decoration: BoxDecoration(
-                                        color: accent.withOpacity(0.12),
-                                        border: Border.all(
-                                            color: accent.withOpacity(0.3)),
-                                        borderRadius: BorderRadius.circular(6),
-                                      ),
-                                      child: Text(
-                                        (hymn.language ?? 'english')
-                                            .toUpperCase(),
-                                        style: TextStyle(
-                                          fontSize: 10,
-                                          fontWeight: FontWeight.w600,
-                                          letterSpacing: 0.8,
-                                          color: accent,
-                                        ),
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                              // Chevron
-                              Icon(
-                                Icons.chevron_right_rounded,
-                                size: 18,
-                                color: cs.onSurfaceVariant,
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
+            return Padding(
+              padding: const EdgeInsets.only(bottom: 8),
+              child: _FavCard(
+                hymn: hymn,
+                accent: accent,
+                onTap: () {
+                  // Use filteredFavorites as the items list so the index
+                  // matches exactly what is displayed on screen.
+                  final items = favCtrl.filteredFavorites.toList();
+                  final idx = items.indexOf(hymn);
+                  Get.to(
+                    () => HymnDetailScreen(
+                      selectedIndex: idx,
+                      items: items,
                     ),
+                    transition: Transition.cupertino,
                   );
                 },
+                onDelete: () => favCtrl.removeFavorite(hymn),
               ),
-            ),
-          ],
+            );
+          },
         );
       }),
+    );
+  }
+}
+
+class _FavCard extends StatelessWidget {
+  const _FavCard({
+    required this.hymn,
+    required this.accent,
+    required this.onTap,
+    required this.onDelete,
+  });
+
+  final dynamic hymn;
+  final Color accent;
+  final VoidCallback onTap;
+  final VoidCallback onDelete;
+
+  @override
+  Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+
+    return Material(
+      color: cs.surfaceVariant,
+      borderRadius: BorderRadius.circular(14),
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(14),
+        splashColor: accent.withOpacity(0.08),
+        highlightColor: accent.withOpacity(0.04),
+        child: Container(
+          height: 62,
+          padding: const EdgeInsets.symmetric(horizontal: 12),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(14),
+            border: Border.all(color: cs.outline),
+          ),
+          child: Row(
+            children: [
+              // ID badge
+              Container(
+                width: 42,
+                height: 38,
+                decoration: BoxDecoration(
+                  color: accent.withOpacity(0.12),
+                  border: Border.all(color: accent.withOpacity(0.35)),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: Center(
+                  child: Text(
+                    '${hymn.id}',
+                    style: TextStyle(
+                      fontWeight: FontWeight.w700,
+                      fontSize: 13,
+                      color: accent,
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(width: 12),
+              // Title + first line
+              Expanded(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      hymn.title,
+                      style: TextStyle(
+                        fontWeight: FontWeight.w600,
+                        fontSize: 14,
+                        color: cs.onSurface,
+                      ),
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      hymn.lyrics.split('\n').first,
+                      style: TextStyle(
+                        fontSize: 11,
+                        fontStyle: FontStyle.italic,
+                        color: cs.onSurfaceVariant,
+                      ),
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ],
+                ),
+              ),
+              // Language badge
+              Container(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                decoration: BoxDecoration(
+                  color: accent.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(6),
+                ),
+                child: Text(
+                  (hymn.language ?? 'en').substring(0, 2).toUpperCase(),
+                  style: TextStyle(
+                    fontSize: 10,
+                    fontWeight: FontWeight.w700,
+                    color: accent,
+                  ),
+                ),
+              ),
+              const SizedBox(width: 4),
+              // Delete button
+              IconButton(
+                icon: const Icon(Icons.favorite_rounded, size: 18),
+                color: Colors.red,
+                onPressed: onDelete,
+                tooltip: 'Remove from favourites',
+              ),
+            ],
+          ),
+        ),
+      ),
     );
   }
 }
