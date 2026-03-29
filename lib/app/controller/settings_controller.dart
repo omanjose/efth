@@ -52,8 +52,10 @@ class SettingsController extends GetxController {
         if (kDebugMode && downloaded.value) {
           final size = files.fold<int>(
               0, (s, f) => s + (f as File).lengthSync());
-          print('✅ Audio: ${files.length} files, '
+          if (kDebugMode) {
+            print('✅ Audio: ${files.length} files, '
               '${(size / 1048576).toStringAsFixed(1)} MB');
+          }
         }
       }
 
@@ -109,8 +111,9 @@ class SettingsController extends GetxController {
         await checkAudioAvailability();
         await hymnController.refreshAudioStatus();
         Get.snackbar(
-          '✅ Download Complete',
+          'Download Complete',
           'Audio files are ready for offline playback.',
+          backgroundColor: Colors.green,
           snackPosition: SnackPosition.BOTTOM,
           duration: const Duration(seconds: 3),
         );
@@ -119,19 +122,21 @@ class SettingsController extends GetxController {
         await checkAudioAvailability();
         final partial = hasPartialDownload.value;
         Get.snackbar(
-          partial ? '📶 Download Paused' : '❌ Download Failed',
+          partial ? 'Download Paused' : 'Download Failed',
           partial
               ? 'Progress saved. Tap Download again to resume.'
               : 'Could not download audio files. Please try again.',
           snackPosition: SnackPosition.BOTTOM,
+          backgroundColor: Colors.green,
           duration: const Duration(seconds: 4),
         );
       }
     } catch (e) {
       if (kDebugMode) print('❌ downloadAudio: $e');
       Get.snackbar(
-        '❌ Error',
-        'An error occurred: $e',
+        'Error',
+        'An error occurred: $e'.toString(),
+        backgroundColor: Colors.red,
         snackPosition: SnackPosition.BOTTOM,
         duration: const Duration(seconds: 3),
       );
@@ -160,8 +165,9 @@ class SettingsController extends GetxController {
         downloaded.value = false;
         await hymnController.refreshAudioStatus();
         Get.snackbar(
-          '✅ Deleted',
+          'Deleted',
           'Audio files deleted successfully.',
+          backgroundColor: Colors.red,
           snackPosition: SnackPosition.BOTTOM,
           duration: const Duration(seconds: 2),
         );
@@ -169,8 +175,9 @@ class SettingsController extends GetxController {
     } catch (e) {
       if (kDebugMode) print('❌ deleteAudioFiles: $e');
       Get.snackbar(
-        '❌ Error',
-        'Could not delete audio files: $e',
+        'Error',
+        'Could not delete audio files: $e'.toString(),
+        backgroundColor: Colors.red,
         snackPosition: SnackPosition.BOTTOM,
         duration: const Duration(seconds: 3),
       );

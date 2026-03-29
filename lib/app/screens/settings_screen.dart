@@ -632,12 +632,16 @@ class _DownloadedTile extends StatelessWidget {
               ],
             ),
           ),
-          IconButton(
-            icon: const Icon(Icons.delete_outline, size: 18),
-            color: Colors.red,
-            onPressed: onDelete,
-            tooltip: 'Delete audio files',
-          ),
+          Icon(
+            Icons.music_note_outlined,size: 18,
+            color: AppColors.gold,
+          )
+          // IconButton(
+          //   icon: const Icon(Icons.delete_outline, size: 18),
+          //   color: Colors.red,
+          //   onPressed: onDelete,
+          //   tooltip: 'Delete audio files',
+          // ),
         ],
       ),
     );
