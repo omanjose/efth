@@ -247,6 +247,7 @@ class SettingsView extends GetView<SettingsController> {
                 'Favourite hymns collection',
                 'Adjustable font size',
                 'Light & dark themes',
+                'Download audio for offline use',
                 'Fully offline',
               ].map((f) => Padding(
                 padding: const EdgeInsets.only(bottom: 6),
