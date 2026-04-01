@@ -216,6 +216,7 @@ class _HymnDetailScreenState extends State<HymnDetailScreen>
                     if (kDebugMode) print('🎵 Playing: ${liveHymn.audioPath}');
                     await audioController.playOne(liveHymn.audioPath!);
                   }
+                
                 },
                 tooltip: playing ? 'Pause' : 'Play',
               ),
