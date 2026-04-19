@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 import '../../utils/theme.dart';
-import '../controller/favorite_controller.dart';
 import '../controller/hymn_controller.dart';
 import '../controller/search_controller.dart';
 import 'favorite_screen.dart';
