@@ -334,7 +334,7 @@ class SettingsView extends GetView<SettingsController> {
             const SizedBox(height: 18),
             _DevInfoRow(icon: Icons.location_on_rounded, text: 'Aba, Nigeria'),
             const SizedBox(height: 8),
-            _DevInfoRow(icon: Icons.group, text: 'By e-Hymnals Dev Team'),
+            _DevInfoRow(icon: Icons.group, text: 'e-Hymnals Dev Team'),
             const SizedBox(height: 8),
             _DevInfoRow(
                 icon: Icons.email_rounded, text: 'contact.signatureapps@gmail.com'),
